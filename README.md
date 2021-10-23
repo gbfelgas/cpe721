@@ -1,3 +1,3 @@
-# CPE721 - Redes Neurais Feedforward
+# CPE721 - Feedforward Neural Networks
 
-Trabalho final da disciplina CPE721 - Redes Neurais Feedforward do Programa de Engenharia Elétrica da COPPE/UFRJ, cujo objetivo é aplicar os conhecimentos adquiridos durante a matéria para resolver um problema supervisionado de aprendizado de máquina. Este projeto foi realizado durante o trimeste de 2021/2.
+Final assignment of CPE721 - Feedforward Neural Networks class (PEE/COPPE/UFRJ) (2021/2). The main goal was to apply the knowledge acquired during the course to solve a supervised learning problem.
