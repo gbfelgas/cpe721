@@ -57,8 +57,10 @@ class LightningModuleMLP(pl.LightningModule):
         x, y = train_batch
         out = self.forward(x)
         loss = self.calculate_and_log_loss(out, y, self.training_losses, "train_loss")
+        acc = torch.count_nonzero(torch.argmax(out, dim=-1) == y, dim=0).item() / len(out)
+        self.log("train_acc", acc)
 
-        return {'loss': loss}
+        return {'loss': loss, "acc": acc}
 
     def training_epoch_end(self, training_step_outputs):
         avg_train_loss = torch.mean(torch.tensor(self.training_losses))
@@ -73,8 +75,10 @@ class LightningModuleMLP(pl.LightningModule):
         x, y = val_batch
         out = self.forward(x)
         loss = self.calculate_and_log_loss(out, y, self.validation_losses, "val_loss")
+        acc = torch.count_nonzero(torch.argmax(out, dim=-1) == y, dim=0).item() / len(out)
+        self.log("val_acc", acc)
 
-        return {'loss': loss}
+        return {'loss': loss, "acc": acc}
 
     def validation_epoch_end(self, validation_step_outputs):
         avg_val_loss = torch.mean(torch.tensor(self.validation_losses))
@@ -89,8 +93,10 @@ class LightningModuleMLP(pl.LightningModule):
         x, y = test_batch
         out = self.forward(x)
         loss = self.calculate_and_log_loss(out, y, self.test_losses, "test_loss")
+        acc = torch.count_nonzero(torch.argmax(out, dim=-1) == y, dim=0).item() / len(out)
+        self.log("test_acc", acc)
 
-        return {'loss': loss}
+        return {'loss': loss, "acc": acc}
 
     def test_epoch_end(self, test_step_outputs):
         avg_test_loss = torch.mean(torch.tensor(self.test_losses))
