@@ -24,7 +24,7 @@ def g1_news_preprocess(
             (size: (number of entries, embeddings dimension))
         metadata_path (str):
             Metadata dataset path, it contains metadata of all entries
-            and assumes classes are storage in <class_column>.
+            and assumes classes are stored in <class_column>.
             (size: (number of entries, ...))
         entry_column (str):
             Column of metadata dataset where entry id is stored.
