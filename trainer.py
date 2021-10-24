@@ -24,11 +24,11 @@ CLASS_THRESHOLD = 0.01
 
 TRAIN_SIZE = 0.8
 
-BATCH_SIZE = 1024
-HIDDEN_DIM = 128
+BATCH_SIZE = 512
+HIDDEN_DIM = 64
 DROPOUT = 0.1
 NUM_LAYERS = 2
-LEARNING_RATE = 0.03
+LEARNING_RATE = 0.0008
 NUM_WORKERS = 8
 SHUFFLE = True
 RANDOM_STATE = 42
@@ -78,15 +78,15 @@ def main(args):
         output_dim=n_classes,
         dropout=DROPOUT,
         learning_rate=LEARNING_RATE,
-        num_layers=NUM_LAYERS,
-        with_softmax=True
+        num_layers=NUM_LAYERS
     )
 
     trainer = Trainer.from_argparse_args(
         args,
         gpus=1,
         val_check_interval=1.0,
-        log_every_n_steps=1
+        log_every_n_steps=1,
+        # track_grad_norm=2
     )
     trainer.fit(model, train_dataloader, val_dataloader)
 

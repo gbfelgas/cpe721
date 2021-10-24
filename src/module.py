@@ -12,7 +12,6 @@ class LightningModuleMLP(pl.LightningModule):
         output_dim: int,
         dropout: float = 0.0,
         num_layers: int = 2,
-        with_softmax: bool = True,
         learning_rate: float = 0.01
     ):
         super().__init__()
@@ -22,8 +21,7 @@ class LightningModuleMLP(pl.LightningModule):
             hidden_dim,
             output_dim,
             dropout,
-            num_layers,
-            with_softmax
+            num_layers
         )
 
         self.criterion = nn.CrossEntropyLoss()
