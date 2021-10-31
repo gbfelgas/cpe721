@@ -33,7 +33,7 @@ RANDOM_STATE = 42
 grid = {
     "batch_size": [256, 512, 1024],
     "hidden_dim": [32, 64, 128],
-    "dropout": [0.05, 0.08, 0.1],
+    "dropout": [0., 0.05, 0.08, 0.1],
     "learning_rate":  [0.0005, 0.001, 0.005]
 }
 
