@@ -4,7 +4,7 @@ Authors:
     Pedro Gil Oliveira de Magalhães Couto
 
 Main python script. It initializes a Lightning Module of the original model
-and fits it with a G1 News dataset. The parameters can be changed in the constants of this file.
+and fits it with G1 News dataset. The parameters can be changed in the constants of this file.
 """
 
 from argparse import ArgumentParser
@@ -27,7 +27,7 @@ TRAIN_SIZE = 0.8
 NUM_LAYERS = 2
 
 SHUFFLE = True
-NUM_WORKERS = 8
+NUM_WORKERS = 0
 RANDOM_STATE = 42
 
 grid = {
