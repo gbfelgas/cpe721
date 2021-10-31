@@ -10,6 +10,7 @@ and fits it with a G1 News dataset. The parameters can be changed in the constan
 from argparse import ArgumentParser
 from pytorch_lightning import Trainer
 from pytorch_lightning.utilities.seed import seed_everything
+from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 
@@ -23,20 +24,23 @@ CLASS_COLUMN = "category_id"
 CLASS_THRESHOLD = 0.01
 
 TRAIN_SIZE = 0.8
-
-BATCH_SIZE = 512
-HIDDEN_DIM = 64
-DROPOUT = 0.1
 NUM_LAYERS = 2
-LEARNING_RATE = 0.0008
-NUM_WORKERS = 8
+
 SHUFFLE = True
+NUM_WORKERS = 8
 RANDOM_STATE = 42
+
+grid = {
+    "batch_size": [256, 512, 1024],
+    "hidden_dim": [32, 64, 128],
+    "dropout": [0.05, 0.08, 0.1],
+    "learning_rate":  [0.0005, 0.001, 0.005]
+}
 
 seed_everything(RANDOM_STATE)
 
 def main(args):
-
+    
     X, y, emb_dim, n_classes = g1_news_preprocess(
         EMBEDDINGS_PATH,
         METADATA_PATH,
@@ -45,52 +49,82 @@ def main(args):
         CLASS_THRESHOLD
     )
 
-    X_train, X_val_test, y_train, y_val_test = train_test_split(X, y, random_state=RANDOM_STATE, train_size=TRAIN_SIZE)
-    X_val, X_test, y_val, y_test = train_test_split(X_val_test, y_val_test, random_state=RANDOM_STATE, train_size=0.5)
-
-    train_dataset = EmbeddingsDataset(X_train, y_train)
-    train_dataloader = DataLoader(
-        train_dataset,
-        batch_size=BATCH_SIZE,
-        num_workers=NUM_WORKERS,
-        shuffle=SHUFFLE
+    X_train, X_val_test, y_train, y_val_test = train_test_split(
+        X,
+        y,
+        random_state=RANDOM_STATE,
+        train_size=TRAIN_SIZE
+    )
+    X_val, X_test, y_val, y_test = train_test_split(
+        X_val_test,
+        y_val_test,
+        random_state=RANDOM_STATE,
+        train_size=0.5
     )
 
-    val_dataset = EmbeddingsDataset(X_val, y_val)
-    val_dataloader = DataLoader(
-        val_dataset,
-        batch_size=BATCH_SIZE,
-        num_workers=NUM_WORKERS,
-        shuffle=SHUFFLE
-    )
+    print(f"Number of classes considered: {n_classes}")
+    print(f"Dataset length: {len(X)}")
 
-    test_dataset = EmbeddingsDataset(X_test, y_test)
-    test_dataloader = DataLoader(
-        test_dataset,
-        batch_size=BATCH_SIZE,
-        num_workers=NUM_WORKERS,
-        shuffle=SHUFFLE
-    )
+    for b in grid["batch_size"]:
+        batch_size = b
 
-    model = LightningModuleMLP(
-        input_dim=emb_dim,
-        hidden_dim=HIDDEN_DIM,
-        output_dim=n_classes,
-        dropout=DROPOUT,
-        learning_rate=LEARNING_RATE,
-        num_layers=NUM_LAYERS
-    )
+        train_dataset = EmbeddingsDataset(X_train, y_train)
+        train_dataloader = DataLoader(
+            train_dataset,
+            batch_size=batch_size,
+            num_workers=NUM_WORKERS,
+            shuffle=SHUFFLE
+        )
 
-    trainer = Trainer.from_argparse_args(
-        args,
-        gpus=1,
-        val_check_interval=1.0,
-        log_every_n_steps=1,
-        # track_grad_norm=2
-    )
-    trainer.fit(model, train_dataloader, val_dataloader)
+        val_dataset = EmbeddingsDataset(X_val, y_val)
+        val_dataloader = DataLoader(
+            val_dataset,
+            batch_size=batch_size,
+            num_workers=NUM_WORKERS,
+            shuffle=SHUFFLE
+        )
 
+        test_dataset = EmbeddingsDataset(X_test, y_test)
+        test_dataloader = DataLoader(
+            test_dataset,
+            batch_size=batch_size,
+            num_workers=NUM_WORKERS,
+            shuffle=SHUFFLE
+        )
 
+        for h in grid["hidden_dim"]:
+            hidden_dim = h
+            for d in grid["dropout"]:
+                dropout = d
+                for lr in grid["learning_rate"]:
+                    learning_rate = lr
+
+                    model = LightningModuleMLP(
+                        input_dim=emb_dim,
+                        hidden_dim=hidden_dim,
+                        output_dim=n_classes,
+                        dropout=dropout,
+                        learning_rate=learning_rate,
+                        num_layers=NUM_LAYERS
+                    )
+
+                    tb_logger = TensorBoardLogger(
+                        "data/logs/grid_logs",
+                        name=f"model_{batch_size}_{hidden_dim}_{dropout}_{learning_rate}"
+                    )
+                    
+                    trainer = Trainer.from_argparse_args(
+                        args,
+                        gpus=1,
+                        val_check_interval=1.0,
+                        log_every_n_steps=1,
+                        default_root_dir="data/logs/",
+                        logger=tb_logger,
+                        # track_grad_norm=2
+                    )
+                    trainer.fit(model, train_dataloader, val_dataloader)
+                    trainer.predict(model, test_dataloader)
+    
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
