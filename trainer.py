@@ -109,7 +109,7 @@ def main(args):
                     )
 
                     tb_logger = TensorBoardLogger(
-                        "data/logs/grid_logs",
+                        "data/logs/grid_logs_with_acc",
                         name=f"model_{batch_size}_{hidden_dim}_{dropout}_{learning_rate}"
                     )
 
