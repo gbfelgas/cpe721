@@ -112,7 +112,7 @@ def main(args):
                         "data/logs/grid_logs",
                         name=f"model_{batch_size}_{hidden_dim}_{dropout}_{learning_rate}"
                     )
-                    
+
                     trainer = Trainer.from_argparse_args(
                         args,
                         gpus=1,
@@ -123,7 +123,7 @@ def main(args):
                         # track_grad_norm=2
                     )
                     trainer.fit(model, train_dataloader, val_dataloader)
-                    trainer.predict(model, test_dataloader)
+                    trainer.test(model, test_dataloader)
     
 if __name__ == "__main__":
     parser = ArgumentParser()
